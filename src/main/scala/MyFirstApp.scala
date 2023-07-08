@@ -1,10 +1,14 @@
 package main.scala
 import java.util.Properties
 import org.apache.kafka.clients.consumer.{ConsumerConfig, KafkaConsumer}
+
 import scala.collection.JavaConverters._
 import play.api.libs.json._
 import org.apache.spark.sql.SparkSession
 import org.apache.hadoop.conf.Configuration
+
+import java.time.{Instant, LocalDate, LocalTime}
+import java.sql.Timestamp
 
 object FirstSparkApp {
   def main(args: Array[String]): Unit = {
@@ -39,7 +43,8 @@ object FirstSparkApp {
       val data=record.value()
 
         val json: JsValue = Json.parse(data)
-
+        val currentDate = LocalDate.now()
+        val currentTime = Timestamp.from(Instant.now())
         val base = (json \ "data" \ "base").as[String]
         val currency = (json \ "data" \ "currency").as[String]
         val amount = (json \ "data" \ "amount").as[String]
@@ -47,22 +52,26 @@ object FirstSparkApp {
         println(s"Base: $base")
         println(s"Currency: $currency")
         println(s"Amount: $amount")
+        println(s"Current Date: $currentDate")
+        println(s"Current Time: $currentTime")
 
         spark.sql("USE mydefault")
         spark.sql(
           """
-          CREATE TABLE IF NOT EXISTS bitcoin_price (
+          CREATE TABLE IF NOT EXISTS bitcoinprice (
             base STRING,
             currency STRING,
-            amount STRING
+            amount STRING,
+            currentDate DATE,
+            currentTime TIMESTAMP
           )
           STORED AS PARQUET
         """)
 
         spark.sql(
           s"""
-        INSERT INTO bitcoin_price
-        VALUES ('$base', '$currency', '$amount')
+        INSERT INTO bitcoinprice
+        VALUES ('$base', '$currency', '$amount', CAST('$currentDate' AS DATE), CAST('$currentTime' AS TIMESTAMP))
         """
         )
 
@@ -70,6 +79,72 @@ object FirstSparkApp {
     }
   }
 }
+
+
+
+// ======================================================================================
+//package main.scala
+//import java.util.Properties
+//import org.apache.kafka.clients.consumer.{ConsumerConfig, KafkaConsumer}
+//import scala.collection.JavaConverters._
+//import play.api.libs.json._
+//import org.apache.spark.sql.SparkSession
+//import org.apache.hadoop.conf.Configuration
+//import java.time.{LocalDate, LocalTime}
+// import java.sql.Timestamp
+//
+//object FirstSparkApp {
+//  def main(args: Array[String]): Unit = {
+//
+//    System.setProperty("SPARK_LOCAL_IP", "192.168.56.106")
+//    System.setProperty("HADOOP_CONF_DIR", "/home/hdoop/hadoop-3.3.4/etc/hadoop")
+//    val hadoopConf = new Configuration()
+//    hadoopConf.set("fs.defaultFS", "hdfs://192.168.56.106:9000")
+//
+//    val spark = SparkSession.builder()
+//      .config("spark.hadoop.fs.defaultFS", hadoopConf.get("fs.defaultFS"))
+//      .config("spark.master", "local")
+//      .appName("HiveTableLoadJob")
+//      .config("hive.metastore.uris", "thrift://sagar-data:9083")
+//      .enableHiveSupport()
+//      .getOrCreate()
+//
+//    val props = new Properties()
+//    props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "sagar-data:9092")
+//    props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer")
+//    props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer")
+//    props.put(ConsumerConfig.GROUP_ID_CONFIG, "my-consumer-group")
+//    props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
+//
+//    val consumer = new KafkaConsumer[String, String](props)
+//    // consumer.
+//    consumer.subscribe(List("data-stream").asJava)
+//
+//    while (true) {
+//      val records = consumer.poll(100)
+//      for (record <- records.asScala) {
+//        // println(s"Received message: key = ${record.key()}, value = ${record.value()}, partition = ${record.partition()}, offset = ${record.offset()}")
+//        val data=record.value()
+//
+//        val json: JsValue = Json.parse(data)
+//        val currentDate = LocalDate.now()
+//        val currentTime = Timestamp.from(Instant.now())
+//
+//        val base = (json \ "data" \ "base").as[String]
+//        val currency = (json \ "data" \ "currency").as[String]
+//        val amount = (json \ "data" \ "amount").as[String]
+//
+//        println(s"Base: $base")
+//        println(s"Currency: $currency")
+//        println(s"Amount: $amount")
+//        println(s"Current Date: $currentDate")
+//        println(s"Current Time: $currentTime")
+//
+//      }
+//    }
+//  }
+//}
+
 
 // ====================================================================================
 // remote Working code
