@@ -10,8 +10,7 @@ spec:
     image: apache/airflow:2.3.0
     command: ["/bin/bash", "-c"]
     args:
-      - |
-        airflow db init &&
+      - airflow db init &&
         airflow users create --username admin --firstname Admin --lastname User --role Admin --email admin@example.com --password admin
     env:
     - name: AIRFLOW__CORE__EXECUTOR
