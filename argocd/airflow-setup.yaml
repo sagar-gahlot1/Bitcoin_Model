@@ -5,6 +5,23 @@ metadata:
   labels:
     app: airflow
 spec:
+  initContainers:
+  - name: init-airflow-db
+    image: apache/airflow:2.3.0
+    command: ["/bin/bash", "-c"]
+    args:
+      - |
+        airflow db init &&
+        airflow users create --username admin --firstname Admin --lastname User --role Admin --email admin@example.com --password admin
+    env:
+    - name: AIRFLOW__CORE__EXECUTOR
+      value: "SequentialExecutor"
+    - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
+      value: "sqlite:////usr/local/airflow/airflow.db"
+    volumeMounts:
+    - name: airflow-database
+      mountPath: /usr/local/airflow
+
   containers:
   - name: airflow
     image: apache/airflow:2.3.0
@@ -18,11 +35,7 @@ spec:
     - name: AIRFLOW__CORE__EXECUTOR
       value: "SequentialExecutor"
     - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
-      value: "sqlite:////usr/local/airflow/airflow.db"
-    - name: _AIRFLOW_WWW_USER_USERNAME 
-      value: "admin"
-    - name: _AIRFLOW_WWW_USER_PASSWORD 
-      value: "admin123"      
+      value: "sqlite:////usr/local/airflow/airflow.db"     
     volumeMounts:
     - name: airflow-config
       mountPath: /usr/local/airflow/airflow.cfg
