@@ -35,6 +35,9 @@ spec:
       name: airflow-config
   - name: airflow-database
     emptyDir: {}
+  - name: airflow-dags
+    configMap:
+      name: airflow-dags    
 ---
 apiVersion: v1
 kind: ConfigMap
