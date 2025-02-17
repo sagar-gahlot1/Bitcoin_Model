@@ -5,35 +5,24 @@ metadata:
   labels:
     app: airflow
 spec:
-  initContainers:
-  - name: init-airflow-db
-    image: apache/airflow:2.3.0
-    command: ["/bin/bash", "-c"]
-    args:
-      - airflow db init &&
-    env:
-    - name: AIRFLOW__CORE__EXECUTOR
-      value: "SequentialExecutor"
-    - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
-      value: "sqlite:////usr/local/airflow/airflow.db"
-    volumeMounts:
-    - name: airflow-database
-      mountPath: /usr/local/airflow
-
   containers:
   - name: airflow
     image: apache/airflow:2.3.0
     command: ["/bin/bash", "-c"]
     args:
       - airflow db init &&
-        airflow webserver --port 8080
+        airflow webserver --port 8080  
     ports:
     - containerPort: 8080
     env:
     - name: AIRFLOW__CORE__EXECUTOR
       value: "SequentialExecutor"
     - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
-      value: "sqlite:////usr/local/airflow/airflow.db"     
+      value: "sqlite:////usr/local/airflow/airflow.db"
+    - name: _AIRFLOW_WWW_USER_USERNAME 
+      value: "admin"
+    - name: _AIRFLOW_WWW_USER_PASSWORD 
+      value: "admin123"      
     volumeMounts:
     - name: airflow-config
       mountPath: /usr/local/airflow/airflow.cfg
@@ -45,7 +34,7 @@ spec:
     configMap:
       name: airflow-config
   - name: airflow-database
-    emptyDir: {}  
+    emptyDir: {}
 ---
 apiVersion: v1
 kind: ConfigMap
