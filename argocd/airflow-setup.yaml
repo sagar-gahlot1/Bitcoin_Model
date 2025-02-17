@@ -19,8 +19,9 @@ spec:
         image: apache/airflow:2.3.0
         command: ["/bin/bash", "-c"]
         args:
-          - airflow db init &&
-            airflow webserver --port 8080  
+          - airflow db init &&        
+            airflow users create --username admin --firstname Admin --lastname User --role Admin --email admin@example.com --password admin &&
+            airflow webserver --port 8080 
         ports:
         - containerPort: 8080
         env:
@@ -42,9 +43,7 @@ spec:
         image: apache/airflow:2.3.0
         command: ["/bin/bash", "-c"]
         args:
-          - airflow db init &&        
-            airflow users create --username admin --firstname Admin --lastname User --role Admin --email admin@example.com --password admin &&
-            airflow webserver --port 8080 
+          - airflow scheduler
         env:
         - name: AIRFLOW__CORE__EXECUTOR
           value: "SequentialExecutor"
