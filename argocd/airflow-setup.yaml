@@ -6,7 +6,7 @@ metadata:
     app: airflow
 spec:
   containers:
-  - name: airflow
+  - name: airflow-webserver
     image: apache/airflow:2.3.0
     command: ["/bin/bash", "-c"]
     args:
@@ -29,6 +29,22 @@ spec:
       subPath: airflow.cfg
     - name: airflow-database
       mountPath: /usr/local/airflow
+  - name: airflow-scheduler
+    image: apache/airflow:2.3.0
+    command: ["/bin/bash", "-c"]
+    args:
+      - airflow scheduler
+    env:
+    - name: AIRFLOW__CORE__EXECUTOR
+      value: "SequentialExecutor"
+    - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
+      value: "sqlite:////usr/local/airflow/airflow.db"
+    volumeMounts:
+    - name: airflow-config
+      mountPath: /usr/local/airflow/airflow.cfg
+      subPath: airflow.cfg
+    - name: airflow-database
+      mountPath: /usr/local/airflow
   volumes:
   - name: airflow-config
     configMap:
@@ -43,7 +59,7 @@ metadata:
 data:
   airflow.cfg: |
     [webserver]
-    base_url = http://192.168.49.2:32726
+    base_url = http://192.168.49.2:32553
     web_server_host = 0.0.0.0
     web_server_port = 8080
     rbac = True
