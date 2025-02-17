@@ -1,56 +1,65 @@
-apiVersion: v1
-kind: Pod
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: airflow-pod
+  name: airflow-deployment
   labels:
     app: airflow
 spec:
-  containers:
-  - name: airflow-webserver
-    image: apache/airflow:2.3.0
-    command: ["/bin/bash", "-c"]
-    args:
-      - airflow db init &&
-        airflow webserver --port 8080  
-    ports:
-    - containerPort: 8080
-    env:
-    - name: AIRFLOW__CORE__EXECUTOR
-      value: "SequentialExecutor"
-    - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
-      value: "sqlite:////usr/local/airflow/airflow.db"
-    - name: _AIRFLOW_WWW_USER_USERNAME 
-      value: "admin"
-    - name: _AIRFLOW_WWW_USER_PASSWORD 
-      value: "admin123"      
-    volumeMounts:
-    - name: airflow-config
-      mountPath: /usr/local/airflow/airflow.cfg
-      subPath: airflow.cfg
-    - name: airflow-database
-      mountPath: /usr/local/airflow
-  - name: airflow-scheduler
-    image: apache/airflow:2.3.0
-    command: ["/bin/bash", "-c"]
-    args:
-      - airflow scheduler
-    env:
-    - name: AIRFLOW__CORE__EXECUTOR
-      value: "SequentialExecutor"
-    - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
-      value: "sqlite:////usr/local/airflow/airflow.db"
-    volumeMounts:
-    - name: airflow-config
-      mountPath: /usr/local/airflow/airflow.cfg
-      subPath: airflow.cfg
-    - name: airflow-database
-      mountPath: /usr/local/airflow
-  volumes:
-  - name: airflow-config
-    configMap:
-      name: airflow-config
-  - name: airflow-database
-    emptyDir: {}
+  replicas: 1
+  selector:
+    matchLabels:
+      app: airflow
+  template:
+    metadata:
+      labels:
+        app: airflow
+    spec:
+      containers:
+      - name: airflow-webserver
+        image: apache/airflow:2.3.0
+        command: ["/bin/bash", "-c"]
+        args:
+          - airflow db init &&
+            airflow webserver --port 8080  
+        ports:
+        - containerPort: 8080
+        env:
+        - name: AIRFLOW__CORE__EXECUTOR
+          value: "SequentialExecutor"
+        - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
+          value: "sqlite:////usr/local/airflow/airflow.db"
+        - name: _AIRFLOW_WWW_USER_USERNAME 
+          value: "admin"
+        - name: _AIRFLOW_WWW_USER_PASSWORD 
+          value: "admin123"      
+        volumeMounts:
+        - name: airflow-config
+          mountPath: /usr/local/airflow/airflow.cfg
+          subPath: airflow.cfg
+        - name: airflow-database
+          mountPath: /usr/local/airflow
+      - name: airflow-scheduler
+        image: apache/airflow:2.3.0
+        command: ["/bin/bash", "-c"]
+        args:
+          - airflow scheduler
+        env:
+        - name: AIRFLOW__CORE__EXECUTOR
+          value: "SequentialExecutor"
+        - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
+          value: "sqlite:////usr/local/airflow/airflow.db"
+        volumeMounts:
+        - name: airflow-config
+          mountPath: /usr/local/airflow/airflow.cfg
+          subPath: airflow.cfg
+        - name: airflow-database
+          mountPath: /usr/local/airflow
+      volumes:
+      - name: airflow-config
+        configMap:
+          name: airflow-config
+      - name: airflow-database
+        emptyDir: {}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -59,7 +68,7 @@ metadata:
 data:
   airflow.cfg: |
     [webserver]
-    base_url = http://192.168.49.2:32553
+    base_url = http://192.168.49.2:32726
     web_server_host = 0.0.0.0
     web_server_port = 8080
     rbac = True
