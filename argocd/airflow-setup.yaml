@@ -10,8 +10,7 @@ spec:
     image: apache/airflow:2.3.0
     command: ["/bin/bash", "-c"]
     args:
-      - |
-        airflow db init &&
+      - airflow db init &&
         airflow webserver --port 8080
     ports:
     - containerPort: 8080
