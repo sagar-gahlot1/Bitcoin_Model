@@ -1,9 +1,3 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: airflow-dags
-data:
-  example_bash_operator.py: |
     from airflow import DAG
     from airflow.operators.bash_operator import BashOperator
     from datetime import datetime, timedelta
