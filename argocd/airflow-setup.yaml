@@ -13,22 +13,14 @@ spec:
     metadata:
       labels:
         app: airflow
-    spec:
-      initContainers:
-      - name: init-airflow-dags
-        image: busybox
-        command: ['sh', '-c', 'cp -r /usr/local/airflow/persistent/* /opt/airflow/dags/']
-        volumeMounts:
-        - name: airflow-persistent-storage
-          mountPath: /usr/local/airflow/persistent
-        - name: airflow-dags
-          mountPath: /opt/airflow/dags    
+    spec:  
       containers:
       - name: airflow-webserver
         image: apache/airflow:2.3.0
         command: ["/bin/bash", "-c"]
         args:
-          - airflow db init &&        
+          - cp -pr /usr/local/airflow/persistent/* /opt/airflow/dags/ &&
+            airflow db init &&        
             airflow users create --username admin --firstname Admin --lastname User --role Admin --email admin@example.com --password admin &&
             airflow webserver --port 8080 
         ports:
