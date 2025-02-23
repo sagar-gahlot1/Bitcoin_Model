@@ -74,6 +74,8 @@ spec:
           name: airflow-config
       - name: airflow-database
         emptyDir: {}
+      - name: airflow-dags
+        emptyDir: {}
       - name: airflow-persistent-storage
         persistentVolumeClaim:
           claimName: airflow-pvc
