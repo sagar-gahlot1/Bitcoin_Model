@@ -14,6 +14,15 @@ spec:
       labels:
         app: airflow
     spec:
+      initContainers:
+      - name: init-airflow-dags
+        image: busybox
+        command: ['sh', '-c', 'cp -r /usr/local/airflow/persistent/* /opt/airflow/dags/']
+        volumeMounts:
+        - name: airflow-persistent-storage
+          mountPath: /usr/local/airflow/persistent
+        - name: airflow-dags
+          mountPath: /opt/airflow/dags    
       containers:
       - name: airflow-webserver
         image: apache/airflow:2.3.0
