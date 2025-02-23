@@ -39,6 +39,8 @@ spec:
           subPath: airflow.cfg
         - name: airflow-database
           mountPath: /usr/local/airflow
+        - name: airflow-persistent-storage
+          mountPath: /usr/local/airflow/persistent
       - name: airflow-scheduler
         image: apache/airflow:2.3.0
         command: ["/bin/bash", "-c"]
@@ -55,8 +57,8 @@ spec:
           subPath: airflow.cfg
         - name: airflow-database
           mountPath: /usr/local/airflow
-       - name: airflow-persistent-storage
-          mountPath: /usr/local/airflow/persistent          
+        - name: airflow-persistent-storage
+          mountPath: /usr/local/airflow/persistent
       volumes:
       - name: airflow-config
         configMap:
@@ -65,7 +67,7 @@ spec:
         emptyDir: {}
       - name: airflow-persistent-storage
         persistentVolumeClaim:
-          claimName: airflow-pvc        
+          claimName: airflow-pvc
 ---
 apiVersion: v1
 kind: ConfigMap
