@@ -55,12 +55,17 @@ spec:
           subPath: airflow.cfg
         - name: airflow-database
           mountPath: /usr/local/airflow
+       - name: airflow-persistent-storage
+          mountPath: /usr/local/airflow/persistent          
       volumes:
       - name: airflow-config
         configMap:
           name: airflow-config
       - name: airflow-database
         emptyDir: {}
+      - name: airflow-persistent-storage
+        persistentVolumeClaim:
+          claimName: airflow-pvc        
 ---
 apiVersion: v1
 kind: ConfigMap
