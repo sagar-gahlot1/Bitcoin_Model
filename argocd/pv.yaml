@@ -1,0 +1,12 @@
+# filepath: pv.yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: airflow-pv
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /home/sagar/workdir/airflow_file
